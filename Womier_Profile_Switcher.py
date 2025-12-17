@@ -10,18 +10,14 @@ from pynput import keyboard
 from PIL import Image
 from pystray import MenuItem as item, Icon
 
-# --- FUNCIÓN AUXILIAR PARA ENCONTRAR ARCHIVOS (CRUCIAL PARA EL .EXE) ---
 def resource_path(relative_path):
-    """ Obtiene la ruta absoluta al recurso, funciona para dev y para PyInstaller """
     try:
-        # PyInstaller crea una carpeta temporal y guarda la ruta en _MEIPASS
         base_path = sys._MEIPASS
     except Exception:
         base_path = os.path.abspath(".")
 
     return os.path.join(base_path, relative_path)
 
-# --- CONFIGURACIÓN ---
 VENDOR_ID = 3141
 PRODUCT_ID = 32869
 USAGE_PAGE = 65384
@@ -33,15 +29,12 @@ ICON_FILE = resource_path("icon.png")
 PACKET_DELAY_SECONDS = 0
 
 # --- CONFIGURACIÓN DEL EFECTO DE FEEDBACK ---
-# Esta pausa es la que crea la "ilusión de instantaneidad"
 FLASH_DURATION_SECONDS = 0.15
 
 # --- CONFIGURACIÓN DEL ATAJO DE TECLADO ---
-# Cambia esta línea si quieres una combinación diferente
 HOTKEY_COMBINATION = '<ctrl>+<alt>+0'
 
 def send_data_block(device, command_id, data_array):
-    """Envía un bloque de datos al teclado en trozos a máxima velocidad."""
     data_array = list(data_array)
     data_sanitized = [min(max(0, val), 255) for val in data_array]
     chunk_size = 56
@@ -56,7 +49,6 @@ def send_data_block(device, command_id, data_array):
             time.sleep(PACKET_DELAY_SECONDS)
 
 def set_keyboard_color_solid(device, r, g, b):
-    """Envía un único comando de identidad para poner todo el teclado de un color sólido."""
     paquete_id = [0x00] * 65
     paquete_id[1:4] = [170, 35, 16]
     paquete_id[9], paquete_id[17] = 1, 0
@@ -65,7 +57,6 @@ def set_keyboard_color_solid(device, r, g, b):
     device.write(bytes(paquete_id))
 
 def aplicar_perfil(perfil_data, app_instance):
-    """Orquesta la secuencia: conectar, flash de color inmediato, y luego carga de datos completa."""
     device = None
     profile_name = perfil_data.get('name', 'Unknown Profile')
     
@@ -166,7 +157,6 @@ class App:
             self.tray_icon.run()
         except FileNotFoundError:
             print("ADVERTENCIA: No se encontró 'icon.png'. El icono de la bandeja no funcionará.")
-            # Si no hay icono, al menos asegúrate de que el cierre funcione bien
             self.root.protocol("WM_DELETE_WINDOW", self.on_closing)    
 
     def setup_ui(self):
